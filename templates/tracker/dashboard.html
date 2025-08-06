@@ -1,0 +1,228 @@
+{% extends 'tracker/base.html' %}
+
+{% block title %}Dashboard - Calorie Tracker{% endblock %}
+
+{% block extra_css %}
+<style>
+    .progress-bar {
+        width: 0%;
+        transition: width 0.3s ease;
+    }
+    
+    .progress-bar[data-width] {
+        width: var(--progress-width, 0%);
+    }
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const progressBars = document.querySelectorAll('.progress-bar[data-width]');
+        progressBars.forEach(function(bar) {
+            const width = bar.getAttribute('data-width');
+            bar.style.setProperty('--progress-width', width + '%');
+        });
+    });
+</script>
+{% endblock %}
+
+{% block content %}
+<div class="space-y-6">
+    <!-- Header -->
+    <div class="bg-white shadow rounded-lg p-6">
+        <div class="flex items-center justify-between">
+            <div>
+                <h1 class="text-3xl font-bold text-gray-900">Dashboard</h1>
+                <p class="text-gray-600">Welcome to your calorie dashboard!</p>
+            </div>
+            <div class="text-right">
+                <p class="text-sm text-gray-500">Today's Date</p>
+                <p class="text-lg font-semibold text-gray-900">{{ today|date:"F j, Y" }}</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Today's Summary -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <!-- Total Calories Card -->
+        <div class="bg-gradient-to-r from-red-500 to-pink-500 rounded-lg shadow-lg p-6 text-white">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-sm opacity-90">Total Calories</p>
+                    <p class="text-3xl font-bold">{{ daily_log.total_calories }}</p>
+                    <p class="text-sm opacity-90">Goal: 2000</p>
+                </div>
+                <div class="text-4xl opacity-75">
+                    <i class="fas fa-fire"></i>
+                </div>
+            </div>
+            <!-- Progress Bar -->
+            <div class="mt-4">
+                <div class="bg-white bg-opacity-30 rounded-full h-2">
+                    <div class="bg-white rounded-full h-2 progress-bar" 
+                         data-width="{% widthratio daily_log.total_calories 2000 100 %}"></div>
+                </div>
+                <p class="text-xs mt-2 opacity-90">
+                    {% widthratio daily_log.total_calories 2000 100 %}% of daily goal
+                </p>
+            </div>
+        </div>
+
+        <!-- Calories Remaining Card -->
+        <div class="bg-gradient-to-r from-green-500 to-emerald-500 rounded-lg shadow-lg p-6 text-white">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-sm opacity-90">Calories Remaining</p>
+                    <p class="text-3xl font-bold">{{ daily_log.get_calories_remaining }}</p>
+                    <p class="text-sm opacity-90">Until goal</p>
+                </div>
+                <div class="text-4xl opacity-75">
+                    <i class="fas fa-bullseye"></i>
+                </div>
+            </div>
+        </div>
+
+        <!-- Food Items Today Card -->
+        <div class="bg-gradient-to-r from-blue-500 to-indigo-500 rounded-lg shadow-lg p-6 text-white">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-sm opacity-90">Food Items</p>
+                    <p class="text-3xl font-bold">{{ today_entries.count }}</p>
+                    <p class="text-sm opacity-90">Added today</p>
+                </div>
+                <div class="text-4xl opacity-75">
+                    <i class="fas fa-utensils"></i>
+                </div>
+            </div>
+        </div>
+
+        <!-- Quick Actions Card -->
+        <div class="bg-gradient-to-r from-purple-500 to-pink-500 rounded-lg shadow-lg p-6 text-white">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-sm opacity-90">Quick Actions</p>
+                    <div class="mt-3 space-y-2">
+                        <a href="{% url 'tracker:add_food' %}" 
+                           class="block bg-white bg-opacity-20 hover:bg-opacity-30 rounded px-3 py-1 text-sm transition-colors">
+                            <i class="fas fa-plus mr-1"></i>Add Food
+                        </a>
+                        <a href="{% url 'tracker:reset_calories' %}" 
+                           class="block bg-white bg-opacity-20 hover:bg-opacity-30 rounded px-3 py-1 text-sm transition-colors">
+                            <i class="fas fa-redo mr-1"></i>Reset Today
+                        </a>
+                    </div>
+                </div>
+                <div class="text-4xl opacity-75">
+                    <i class="fas fa-bolt"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Today's Food Entries -->
+    <div class="bg-white shadow rounded-lg">
+        <div class="px-6 py-4 border-b border-gray-200">
+            <div class="flex items-center justify-between">
+                <h2 class="text-xl font-semibold text-gray-900">Today's Food Entries</h2>
+                <a href="{% url 'tracker:add_food' %}" 
+                   class="bg-primary-600 hover:bg-primary-700 text-white px-4 py-2 rounded-md text-sm font-medium transition-colors">
+                    <i class="fas fa-plus mr-1"></i>Add Food
+                </a>
+            </div>
+        </div>
+        
+        <div class="p-6">
+            {% if today_entries %}
+                <div class="overflow-x-auto">
+                    <table class="min-w-full divide-y divide-gray-200">
+                        <thead class="bg-gray-50">
+                            <tr>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Food Item</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Quantity</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Calories</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Time</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody class="bg-white divide-y divide-gray-200">
+                            {% for entry in today_entries %}
+                            <tr class="hover:bg-gray-50">
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <div class="text-sm font-medium text-gray-900">{{ entry.food_item.name }}</div>
+                                    <div class="text-sm text-gray-500">{{ entry.food_item.serving_size }}</div>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ entry.quantity }}</td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <span class="inline-flex px-2 py-1 text-sm font-semibold rounded-full bg-red-100 text-red-800">
+                                        {{ entry.calories_consumed }} cal
+                                    </span>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                    {{ entry.consumed_at|time:"g:i A" }}
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                                    <a href="{% url 'tracker:delete_entry' entry.id %}" 
+                                       class="text-red-600 hover:text-red-900"
+                                       title="Delete this food entry"
+                                       aria-label="Delete food entry for {{ entry.food_item.name }}"
+                                       onclick="return confirm('Are you sure you want to delete this entry?')">
+                                        <i class="fas fa-trash"></i>
+                                    </a>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% else %}
+                <div class="text-center py-12">
+                    <i class="fas fa-utensils text-6xl text-gray-300 mb-4"></i>
+                    <h3 class="text-lg font-medium text-gray-900 mb-2">No food entries today</h3>
+                    <p class="text-gray-500 mb-6">Start tracking your calories by adding your first food item!</p>
+                    <a href="{% url 'tracker:add_food' %}" 
+                       class="bg-primary-600 hover:bg-primary-700 text-white px-6 py-3 rounded-md font-medium transition-colors">
+                        <i class="fas fa-plus mr-2"></i>Add Your First Food
+                    </a>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Food Database Summary -->
+    <div class="bg-white shadow rounded-lg">
+        <div class="px-6 py-4 border-b border-gray-200">
+            <div class="flex items-center justify-between">
+                <h2 class="text-xl font-semibold text-gray-900">Food Database</h2>
+                <a href="{% url 'tracker:food_list' %}" 
+                   class="text-primary-600 hover:text-primary-700 text-sm font-medium">
+                    View All <i class="fas fa-arrow-right ml-1"></i>
+                </a>
+            </div>
+        </div>
+        
+        <div class="p-6">
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {% for food in recent_foods %}
+                <div class="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <h3 class="text-sm font-medium text-gray-900">{{ food.name }}</h3>
+                            <p class="text-xs text-gray-500">{{ food.serving_size }}</p>
+                        </div>
+                        <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-green-100 text-green-800">
+                            {{ food.calories }} cal
+                        </span>
+                    </div>
+                </div>
+                {% empty %}
+                <div class="col-span-full text-center py-8">
+                    <i class="fas fa-database text-4xl text-gray-300 mb-3"></i>
+                    <p class="text-gray-500">No food items in database yet</p>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 

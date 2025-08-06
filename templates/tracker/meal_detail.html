@@ -1,0 +1,294 @@
+{% extends 'tracker/base.html' %}
+
+{% block title %}Meal Detail - {{ meal.get_meal_type_display }} - Calorie Tracker{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h1>
+                <i class="fas fa-utensils me-2"></i>{{ meal.get_meal_type_display }}
+                <small class="text-muted">{{ meal.date|date:"F j, Y" }}</small>
+            </h1>
+            <div>
+                <a href="{% url 'tracker:meal_edit' meal.pk %}" class="btn btn-warning">
+                    <i class="fas fa-edit me-2"></i>Edit Meal
+                </a>
+                <a href="{% url 'tracker:meal_delete' meal.pk %}" class="btn btn-danger">
+                    <i class="fas fa-trash me-2"></i>Delete Meal
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Meal Summary Cards -->
+<div class="row mb-4">
+    <div class="col-md-3 mb-3">
+        <div class="card calorie-card h-100">
+            <div class="card-body text-center">
+                <i class="fas fa-fire fa-2x mb-2"></i>
+                <h3 class="mb-0">{{ meal.total_calories }}</h3>
+                <small>Total Calories</small>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-3 mb-3">
+        <div class="card protein-card h-100">
+            <div class="card-body text-center">
+                <i class="fas fa-dumbbell fa-2x mb-2"></i>
+                <h3 class="mb-0">{{ meal.total_protein|floatformat:1 }}g</h3>
+                <small>Total Protein</small>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-3 mb-3">
+        <div class="card carbs-card h-100">
+            <div class="card-body text-center">
+                <i class="fas fa-bread-slice fa-2x mb-2"></i>
+                <h3 class="mb-0">{{ meal.total_carbs|floatformat:1 }}g</h3>
+                <small>Total Carbs</small>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-3 mb-3">
+        <div class="card fat-card h-100">
+            <div class="card-body text-center">
+                <i class="fas fa-oil-can fa-2x mb-2"></i>
+                <h3 class="mb-0">{{ meal.total_fat|floatformat:1 }}g</h3>
+                <small>Total Fat</small>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Food Items -->
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0">
+                    <i class="fas fa-list me-2"></i>Food Items ({{ meal.mealitem_set.count }})
+                </h5>
+            </div>
+            <div class="card-body">
+                {% if meal.mealitem_set.all %}
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Food Item</th>
+                                    <th>Quantity</th>
+                                    <th>Calories</th>
+                                    <th>Protein</th>
+                                    <th>Carbs</th>
+                                    <th>Fat</th>
+                                    <th>Fiber</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for item in meal.mealitem_set.all %}
+                                <tr>
+                                    <td>
+                                        <strong>{{ item.food.name }}</strong>
+                                        <br>
+                                        <small class="text-muted">
+                                            {{ item.food.calories_per_100g }} cal/100g
+                                        </small>
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-primary">{{ item.quantity_grams }}g</span>
+                                    </td>
+                                    <td>
+                                        <strong class="text-primary">{{ item.total_calories }}</strong>
+                                    </td>
+                                    <td>
+                                        <span class="text-success">{{ item.total_protein|floatformat:1 }}g</span>
+                                    </td>
+                                    <td>
+                                        <span class="text-warning">{{ item.total_carbs|floatformat:1 }}g</span>
+                                    </td>
+                                    <td>
+                                        <span class="text-danger">{{ item.total_fat|floatformat:1 }}g</span>
+                                    </td>
+                                    <td>
+                                        {% if item.food.fiber_per_100g > 0 %}
+                                            <span class="text-info">{{ item.food.fiber_per_100g|floatformat:1 }}g</span>
+                                        {% else %}
+                                            <span class="text-muted">-</span>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                            <tfoot class="table-dark">
+                                <tr>
+                                    <td><strong>TOTALS</strong></td>
+                                    <td></td>
+                                    <td><strong>{{ meal.total_calories }}</strong></td>
+                                    <td><strong>{{ meal.total_protein|floatformat:1 }}g</strong></td>
+                                    <td><strong>{{ meal.total_carbs|floatformat:1 }}g</strong></td>
+                                    <td><strong>{{ meal.total_fat|floatformat:1 }}g</strong></td>
+                                    <td></td>
+                                </tr>
+                            </tfoot>
+                        </table>
+                    </div>
+                {% else %}
+                    <div class="text-center py-4">
+                        <i class="fas fa-exclamation-triangle fa-3x text-muted mb-3"></i>
+                        <h5 class="text-muted">No food items in this meal</h5>
+                        <p class="text-muted">This meal appears to be empty. You can edit it to add food items.</p>
+                        <a href="{% url 'tracker:meal_edit' meal.pk %}" class="btn btn-primary">
+                            <i class="fas fa-edit me-2"></i>Edit Meal
+                        </a>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Nutritional Breakdown Chart -->
+{% if meal.mealitem_set.all %}
+<div class="row mt-4">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header bg-info text-white">
+                <h5 class="mb-0">
+                    <i class="fas fa-chart-pie me-2"></i>Calorie Breakdown
+                </h5>
+            </div>
+            <div class="card-body">
+                <canvas id="calorieChart" width="400" height="200"></canvas>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header bg-success text-white">
+                <h5 class="mb-0">
+                    <i class="fas fa-chart-bar me-2"></i>Macronutrient Distribution
+                </h5>
+            </div>
+            <div class="card-body">
+                <canvas id="macroChart" width="400" height="200"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+
+<!-- Action Buttons -->
+<div class="row mt-4">
+    <div class="col-12 text-center">
+        <a href="{% url 'tracker:dashboard' %}" class="btn btn-outline-primary me-2">
+            <i class="fas fa-arrow-left me-2"></i>Back to Dashboard
+        </a>
+        <a href="{% url 'tracker:meal_create' %}" class="btn btn-success me-2">
+            <i class="fas fa-plus me-2"></i>Add Another Meal
+        </a>
+        <a href="{% url 'tracker:reports' %}" class="btn btn-info">
+            <i class="fas fa-chart-line me-2"></i>View Reports
+        </a>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+{% if meal.mealitem_set.all %}
+<!-- Chart data from Django template -->
+<script id="chart-data" type="application/json">
+{
+    "foodLabels": [
+        {% for item in meal.mealitem_set.all %}
+            "{{ item.food.name }}"{% if not forloop.last %},{% endif %}
+        {% endfor %}
+    ],
+    "calorieData": [
+        {% for item in meal.mealitem_set.all %}
+            {{ item.total_calories }}{% if not forloop.last %},{% endif %}
+        {% endfor %}
+    ],
+    "macroData": {
+        "protein": {{ meal.total_protein }},
+        "carbs": {{ meal.total_carbs }},
+        "fat": {{ meal.total_fat }}
+    }
+}
+</script>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Get chart data from the JSON script tag
+    const chartDataElement = document.getElementById('chart-data');
+    const chartData = JSON.parse(chartDataElement.textContent);
+    
+    // Calorie breakdown chart
+    const calorieCtx = document.getElementById('calorieChart').getContext('2d');
+    const calorieChart = new Chart(calorieCtx, {
+        type: 'doughnut',
+        data: {
+            labels: chartData.foodLabels,
+            datasets: [{
+                data: chartData.calorieData,
+                backgroundColor: [
+                    '#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', '#9966FF',
+                    '#FF9F40', '#FF6384', '#C9CBCF', '#4BC0C0', '#FF6384'
+                ]
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'bottom'
+                }
+            }
+        }
+    });
+    
+    // Macronutrient distribution chart
+    const macroCtx = document.getElementById('macroChart').getContext('2d');
+    const macroChart = new Chart(macroCtx, {
+        type: 'bar',
+        data: {
+            labels: ['Protein', 'Carbs', 'Fat'],
+            datasets: [{
+                label: 'Grams',
+                data: [
+                    chartData.macroData.protein,
+                    chartData.macroData.carbs,
+                    chartData.macroData.fat
+                ],
+                backgroundColor: [
+                    '#4BC0C0',
+                    '#FFCE56',
+                    '#FF6384'
+                ]
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                y: {
+                    beginAtZero: true
+                }
+            },
+            plugins: {
+                legend: {
+                    display: false
+                }
+            }
+        }
+    });
+});
+</script>
+{% endif %}
+{% endblock %} 

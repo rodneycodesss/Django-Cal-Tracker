@@ -1,0 +1,70 @@
+{% extends 'tracker/base.html' %}
+
+{% block title %}{{ title }} - Calorie Tracker{% endblock %}
+
+{% block content %}
+<div class="max-w-2xl mx-auto">
+    <div class="bg-white shadow rounded-lg p-6">
+        <div class="mb-6">
+            <h1 class="text-3xl font-bold text-gray-900">{{ title }}</h1>
+            <p class="text-gray-600 mt-2">Add a new food item to your database</p>
+        </div>
+
+        <form method="post" class="space-y-6">
+            {% csrf_token %}
+            
+            <div>
+                <label for="{{ form.name.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
+                    Food Name *
+                </label>
+                {{ form.name }}
+                {% if form.name.errors %}
+                    <div class="mt-1 text-sm text-red-600">
+                        {% for error in form.name.errors %}
+                            {{ error }}
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            </div>
+
+            <div>
+                <label for="{{ form.calories.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
+                    Calories per Serving *
+                </label>
+                {{ form.calories }}
+                {% if form.calories.errors %}
+                    <div class="mt-1 text-sm text-red-600">
+                        {% for error in form.calories.errors %}
+                            {{ error }}
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            </div>
+
+            <div>
+                <label for="{{ form.serving_size.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
+                    Serving Size *
+                </label>
+                {{ form.serving_size }}
+                {% if form.serving_size.errors %}
+                    <div class="mt-1 text-sm text-red-600">
+                        {% for error in form.serving_size.errors %}
+                            {{ error }}
+                        {% endfor %}
+                    </div>
+                {% endif %}
+                <p class="mt-1 text-sm text-gray-500">e.g., 1 cup, 100g, 1 medium apple</p>
+            </div>
+
+            <div class="flex space-x-4 pt-4">
+                <button type="submit" class="flex-1 bg-primary-600 hover:bg-primary-700 text-white px-6 py-3 rounded-md font-medium transition-colors">
+                    <i class="fas fa-save mr-2"></i>Save Food Item
+                </button>
+                <a href="{% url 'tracker:food_list' %}" class="flex-1 bg-gray-300 hover:bg-gray-400 text-gray-800 px-6 py-3 rounded-md font-medium transition-colors text-center">
+                    <i class="fas fa-times mr-2"></i>Cancel
+                </a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %} 

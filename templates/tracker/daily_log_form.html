@@ -1,0 +1,156 @@
+{% extends 'tracker/base.html' %}
+
+{% block title %}
+    {% if daily_log %}Edit Daily Goals{% else %}Set Daily Goals{% endif %} - Calorie Tracker
+{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8 col-lg-6">
+        <div class="card shadow">
+            <div class="card-header {% if daily_log %}bg-warning{% else %}bg-success{% endif %} text-white">
+                <h4 class="mb-0">
+                    <i class="fas fa-{% if daily_log %}edit{% else %}plus{% endif %} me-2"></i>
+                    {% if daily_log %}Edit Daily Goals{% else %}Set Daily Goals{% endif %}
+                    {% if log_date %}
+                        <small class="d-block">{{ log_date|date:"F j, Y" }}</small>
+                    {% endif %}
+                </h4>
+            </div>
+            <div class="card-body p-4">
+                <form method="post">
+                    {% csrf_token %}
+                    
+                    {% if form.errors %}
+                        <div class="alert alert-danger">
+                            <i class="fas fa-exclamation-triangle me-2"></i>
+                            Please correct the errors below.
+                        </div>
+                    {% endif %}
+                    
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="{{ form.calorie_goal.id_for_label }}" class="form-label">
+                                <i class="fas fa-fire me-2"></i>Daily Calorie Goal *
+                            </label>
+                            {{ form.calorie_goal }}
+                            {% if form.calorie_goal.errors %}
+                                <div class="text-danger small mt-1">
+                                    {{ form.calorie_goal.errors.0 }}
+                                </div>
+                            {% endif %}
+                            <div class="form-text">Recommended: 2000 calories for adults</div>
+                        </div>
+                        
+                        <div class="col-md-6 mb-3">
+                            <label for="{{ form.protein_goal.id_for_label }}" class="form-label">
+                                <i class="fas fa-dumbbell me-2"></i>Daily Protein Goal (g) *
+                            </label>
+                            {{ form.protein_goal }}
+                            {% if form.protein_goal.errors %}
+                                <div class="text-danger small mt-1">
+                                    {{ form.protein_goal.errors.0 }}
+                                </div>
+                            {% endif %}
+                            <div class="form-text">Recommended: 0.8g per kg of body weight</div>
+                        </div>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="{{ form.carbs_goal.id_for_label }}" class="form-label">
+                                <i class="fas fa-bread-slice me-2"></i>Daily Carbs Goal (g) *
+                            </label>
+                            {{ form.carbs_goal }}
+                            {% if form.carbs_goal.errors %}
+                                <div class="text-danger small mt-1">
+                                    {{ form.carbs_goal.errors.0 }}
+                                </div>
+                            {% endif %}
+                            <div class="form-text">Recommended: 45-65% of total calories</div>
+                        </div>
+                        
+                        <div class="col-md-6 mb-3">
+                            <label for="{{ form.fat_goal.id_for_label }}" class="form-label">
+                                <i class="fas fa-oil-can me-2"></i>Daily Fat Goal (g) *
+                            </label>
+                            {{ form.fat_goal }}
+                            {% if form.fat_goal.errors %}
+                                <div class="text-danger small mt-1">
+                                    {{ form.fat_goal.errors.0 }}
+                                </div>
+                            {% endif %}
+                            <div class="form-text">Recommended: 20-35% of total calories</div>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="{{ form.notes.id_for_label }}" class="form-label">
+                            <i class="fas fa-sticky-note me-2"></i>Daily Notes
+                        </label>
+                        {{ form.notes }}
+                        {% if form.notes.errors %}
+                            <div class="text-danger small mt-1">
+                                {{ form.notes.errors.0 }}
+                            </div>
+                        {% endif %}
+                        <div class="form-text">Optional notes about your day, goals, or achievements</div>
+                    </div>
+                    
+                    <div class="d-flex gap-2">
+                        <button type="submit" class="btn btn-primary flex-fill">
+                            <i class="fas fa-save me-2"></i>
+                            {% if daily_log %}Update Goals{% else %}Save Goals{% endif %}
+                        </button>
+                        <a href="{% url 'tracker:dashboard' %}" class="btn btn-outline-secondary">
+                            <i class="fas fa-times me-2"></i>Cancel
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+        
+        <!-- Nutrition Guidelines -->
+        <div class="card mt-4">
+            <div class="card-header bg-info text-white">
+                <h5 class="mb-0">
+                    <i class="fas fa-info-circle me-2"></i>Nutrition Guidelines
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <h6><i class="fas fa-fire text-danger me-2"></i>Calories</h6>
+                        <p class="small text-muted">
+                            Your daily calorie needs depend on age, gender, activity level, and goals. 
+                            Use a calorie calculator for personalized recommendations.
+                        </p>
+                        
+                        <h6><i class="fas fa-dumbbell text-primary me-2"></i>Protein</h6>
+                        <p class="small text-muted">
+                            Essential for muscle building and repair. Athletes may need 1.2-2.0g per kg of body weight.
+                        </p>
+                    </div>
+                    <div class="col-md-6">
+                        <h6><i class="fas fa-bread-slice text-warning me-2"></i>Carbohydrates</h6>
+                        <p class="small text-muted">
+                            Primary energy source. Choose complex carbs like whole grains, fruits, and vegetables.
+                        </p>
+                        
+                        <h6><i class="fas fa-oil-can text-danger me-2"></i>Fat</h6>
+                        <p class="small text-muted">
+                            Important for hormone production and nutrient absorption. Focus on healthy fats.
+                        </p>
+                    </div>
+                </div>
+                
+                <div class="alert alert-light mt-3">
+                    <i class="fas fa-lightbulb me-2"></i>
+                    <strong>Tip:</strong> These are general guidelines. Consult with a healthcare professional 
+                    for personalized nutrition advice, especially if you have specific health conditions or goals.
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 

@@ -1,0 +1,46 @@
+{% extends 'tracker/base.html' %}
+
+{% block title %}Reset Daily Calories - Calorie Tracker{% endblock %}
+
+{% block content %}
+<div class="max-w-md mx-auto">
+    <div class="bg-white shadow rounded-lg p-6">
+        <div class="text-center mb-6">
+            <i class="fas fa-redo text-6xl text-orange-500 mb-4"></i>
+            <h1 class="text-2xl font-bold text-gray-900">Reset Daily Calories</h1>
+            <p class="text-gray-600 mt-2">Are you sure you want to reset today's calorie count?</p>
+        </div>
+
+        <div class="bg-gray-50 rounded-lg p-4 mb-6">
+            <h3 class="text-lg font-medium text-gray-900">Today's Summary</h3>
+            <p class="text-sm text-gray-600">Date: {{ daily_log.date|date:"F j, Y" }}</p>
+            <p class="text-sm text-gray-600">Total Calories: {{ daily_log.total_calories }} cal</p>
+            <p class="text-sm text-gray-600">Entries: {{ daily_log.entries.count }} items</p>
+        </div>
+
+        <div class="bg-red-50 border border-red-200 rounded-lg p-4 mb-6">
+            <div class="flex">
+                <i class="fas fa-exclamation-triangle text-red-400 mt-0.5 mr-3"></i>
+                <div>
+                    <h4 class="text-sm font-medium text-red-800">Warning</h4>
+                    <p class="text-sm text-red-700 mt-1">
+                        This will permanently delete all calorie entries for today and reset your daily total to 0.
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <form method="post" class="space-y-4">
+            {% csrf_token %}
+            <div class="flex space-x-4">
+                <button type="submit" class="flex-1 bg-orange-600 hover:bg-orange-700 text-white px-4 py-2 rounded-md font-medium transition-colors">
+                    <i class="fas fa-redo mr-2"></i>Reset Today
+                </button>
+                <a href="{% url 'tracker:dashboard' %}" class="flex-1 bg-gray-300 hover:bg-gray-400 text-gray-800 px-4 py-2 rounded-md font-medium transition-colors text-center">
+                    <i class="fas fa-times mr-2"></i>Cancel
+                </a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %} 
